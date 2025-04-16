@@ -2,7 +2,8 @@ package;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.util.FlxColor;
+
+// import flixel.util.FlxColor;
 
 class Player extends FlxSprite
 {
@@ -11,8 +12,24 @@ class Player extends FlxSprite
     public function new(x:Float = 0, y:Float = 0)
     {
         super(x,y); // Call the parent constructor with x and y coordinates
-        makeGraphic(16, 16, FlxColor.BLUE); // Generate a blue square for the player
+
+        // makeGraphic(16, 16, FlxColor.BLUE); // Generate a blue square for the player
+
+        loadGraphic(AssetPaths.player__png, true, 16, 16); // Load the player graphic
         drag.x = drag.y = 800; // Prevent player from running forever
+        setFacingFlip(LEFT, false, false); // Set the facing direction to left, sprite will not be flipped
+        setFacingFlip(RIGHT, true, false); // Set the facing direction to right, sprite will be flipped
+        setSize(8, 8); // Set the size of the player sprite
+        offset.set(4, 8); // Set the offset for the sprite
+
+        // Add idle animations for down, left-right, and up directions
+        animation.add("d_idle", [0]); 
+        animation.add("lr_idle", [3]);
+        animation.add("u_idle", [6]);
+        // Add walk animations for down, left-right, and up directions
+        animation.add("d_walk", [0, 1, 0, 2], 6);
+        animation.add("lr_walk", [3, 4, 3, 5], 6);
+        animation.add("u_walk", [6, 7, 6, 8], 6);
     }
 
     function updateMovement()
@@ -46,6 +63,7 @@ class Player extends FlxSprite
                     newAngle -= 45;
                 else if (right)
                     newAngle += 45;
+                facing = UP;
             }
             else if (down)
             {
@@ -54,13 +72,37 @@ class Player extends FlxSprite
                     newAngle += 45;
                 else if (right)
                     newAngle -= 45;
+                facing = DOWN;
             }
             else if (left)
+            {
                 newAngle = 180;
+                facing = LEFT;
+            }
             else if (right)
+            {
                 newAngle = 0;
-            
+                facing = RIGHT;
+            }
             velocity.setPolarDegrees(SPEED, newAngle); // Set the velocity based on the angle and speed
+        }
+
+        var action = "idle";
+        //check if the player is moving, and not walking into walls
+        if ((velocity.x != 0 || velocity.y != 0) && touching == NONE)
+        {
+            action = "walk";
+        }
+
+        switch (facing)
+        {
+            case LEFT, RIGHT :
+                animation.play("lr_" + action);
+            case UP :
+                animation.play("u_" + action);
+            case DOWN :
+                animation.play("d_" + action);
+            case _ :
         }
     }
 
